@@ -1,0 +1,8 @@
+FROM postgres:15
+
+ENV POSTGRES_PASSWORD=admin1234
+ENV POSTGRES_DB=dono8do_postgres
+
+VOLUME /var/lib/postgresql/data
+
+EXPOSE 5432
