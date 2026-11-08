@@ -1,8 +1,16 @@
 import conectar
+from redis.commands.search.field import TextField, TagField
+from redis.commands.search.index_definition import IndexDefinition, IndexType
+from redis.commands.search.query import Query
+from redis.commands.search.aggregation import AggregateRequest
+from redis.commands.search import reducers
 
 db = conectar.conexion()
 
 def ejectuar_script_dono8do_redis():
+
+    # Se vacia Redis al empezar para que el script se pueda ejecutar varias veces sin dar error
+    db.flushdb()
 
     # ----------------------- 1 ---------------------
     print("#####1. Crear registros clave-valor#####")
@@ -32,7 +40,7 @@ def ejectuar_script_dono8do_redis():
     # ------------------------ 5 ------------------------
     print("#####5. Eliminar clave-valor#####")
     val_eliminar = db.get("donante:002")
-    db.delete(val_eliminar)
+    db.delete("donante:002")
     print(f"Clave eliminada: 'donante:002 | Valor eliminado: {val_eliminar}\n")
 
     # ----------------------- 6 -------------------------
@@ -110,6 +118,42 @@ def ejectuar_script_dono8do_redis():
     db.lpush("eventos_donacion", "Triana_Movil:50")
     db.lpush("eventos_donacion", "Nervion_Campana:80")
     print(f"Lista creada {db.lrange('eventos_donacion', 0, -1)}\n")
+
+
+    # ----------------------- 17 -------------------------------
+    print("#####17. Obtener elementos de una lista con un filtro#####")
+    print("Se obtienen los eventos de la lista 'eventos_donacion' con un objetivo de 80 bolsas o mas")
+    for evento in db.lrange("eventos_donacion", 0, -1):
+        if int(evento.split(":")[1]) >= 80:
+            print(f"Cumple el filtro: {evento}")
+    print()
+
+    # ----------------------- 18 -------------------------------
+    print("#####18. Crear datos con indices (esquema de 3 campos)#####")
+    print("Se crea el indice 'idx_donantes' sobre los hash 'ficha_donante:*' con los campos nombre, ciudad y grupo_sanguineo")
+    esquema = (TextField("nombre"), TagField("ciudad"), TagField("grupo_sanguineo"))
+    db.ft("idx_donantes").create_index(esquema, definition=IndexDefinition(prefix=["ficha_donante:"], index_type=IndexType.HASH))
+    db.hset("ficha_donante:1", mapping={"nombre": "Celia Verdugo", "ciudad": "Sevilla", "grupo_sanguineo": "A+"})
+    db.hset("ficha_donante:2", mapping={"nombre": "Pablo Rodriguez", "ciudad": "Sevilla", "grupo_sanguineo": "O-"})
+    db.hset("ficha_donante:3", mapping={"nombre": "Jesus Zamorano", "ciudad": "Cadiz", "grupo_sanguineo": "A+"})
+    db.hset("ficha_donante:4", mapping={"nombre": "Juan de Mesa", "ciudad": "Huelva", "grupo_sanguineo": "A+"})
+    print(f"Documentos indexados: {db.ft('idx_donantes').info()['num_docs']}\n")
+
+    # ----------------------- 19 -------------------------------
+    print("#####19. Busqueda con indices en base a un campo#####")
+    print("Se buscan los donantes cuya ciudad es Sevilla (@ciudad:{Sevilla})")
+    res = db.ft("idx_donantes").search(Query("@ciudad:{Sevilla}"))
+    for doc in res.docs:
+        print(f"{doc.id} -> {doc.nombre} | {doc.ciudad} | {doc.grupo_sanguineo}")
+    print(f"Total encontrados: {res.total}\n")
+
+    # ----------------------- 20 -------------------------------
+    print("#####20. Group by usando los indices#####")
+    print("Se agrupan los donantes por grupo_sanguineo y se cuenta cuantos hay en cada grupo")
+    peticion = AggregateRequest("*").group_by("@grupo_sanguineo", reducers.count().alias("num_donantes"))
+    for fila in db.ft("idx_donantes").aggregate(peticion).rows:
+        print(f"Grupo {fila[1]}: {fila[3]} donantes")
+    print()
 
 
 ejectuar_script_dono8do_redis()

@@ -1,0 +1,10 @@
+# docker build -t dono8do_mysql dockerfiles/mysql
+# docker run -d --name dono8do_mysql -p 3308:3306 dono8do_mysql
+FROM mysql:8.0
+
+ENV MYSQL_ROOT_PASSWORD=admin1234
+ENV MYSQL_DATABASE=dono8do_mysql
+
+VOLUME /var/lib/mysql
+
+EXPOSE 3306
