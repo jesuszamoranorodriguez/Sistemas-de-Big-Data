@@ -1,0 +1,8 @@
+
+.env
+
+aws-env/
+boto3-venv/
+myvenv/
+
+__pycache__/

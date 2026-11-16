@@ -1,0 +1,52 @@
+{
+  "usuarios_A+_con_sus_donaciones": [
+    {
+      "nombre": "Jose",
+      "apellidos": "Cortes",
+      "email": "jose@mail.com",
+      "grupo_sanguineo": "A+",
+      "donaciones": [
+        {
+          "email": "jose@mail.com",
+          "estado": "completada",
+          "hospital": "Hospital Virgen Macarena",
+          "tipo": "Sangre total",
+          "volumen_ml": "450",
+          "fecha_donacion": "2026-04-14"
+        }
+      ]
+    },
+    {
+      "nombre": "Jesus",
+      "apellidos": "Zamorano",
+      "email": "jesus@mail.com",
+      "grupo_sanguineo": "A+",
+      "donaciones": []
+    }
+  ],
+  "stock_bajo": [
+    {
+      "id_stock": 2,
+      "id_centro": 1,
+      "grupo_sanguineo": "O-",
+      "cantidad_bolsas": 8
+    },
+    {
+      "id_stock": 5,
+      "id_centro": 2,
+      "grupo_sanguineo": "O-",
+      "cantidad_bolsas": 5
+    }
+  ],
+  "eventos_programados": [
+    {
+      "estado": "programado",
+      "fecha_inicio": "2026-11-25",
+      "id_evento": "EV-1",
+      "inscritos": "36",
+      "municipio": "Sevilla",
+      "nombre": "Campaña Universitaria",
+      "plazas": "80"
+    }
+  ]
+}
